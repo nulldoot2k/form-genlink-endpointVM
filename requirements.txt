@@ -1,6 +1,7 @@
-Flask
-Flask-Session
+flask
+flask-session
 requests
-Jinja2
-Werkzeug
+jinja2
+werkzeug
 flask-basicauth
+python-dotenv

@@ -1,9 +1,13 @@
-import os 
+import os
 import uuid
 import time
-from flask import Flask, session, redirect, url_for, render_template, abort, request
+from flask import Flask, session, redirect, url_for, render_template, abort, request, jsonify
 from flask_basicauth import BasicAuth
+from dotenv import load_dotenv
 
+load_dotenv()
+
+# Base set config
 app = Flask(__name__, static_folder='templates')
 app.secret_key = os.environ.get('SECRET_FLASK')
 app.config['SERVER_NAME'] = os.environ.get('HOST_NGORK')
@@ -12,9 +16,19 @@ app.config['BASIC_AUTH_PASSWORD'] = os.environ.get('BASIC_AUTH_PASSWORD')
 
 basic_auth = BasicAuth(app)
 
-link_status = {}
-link_expiry_time = {}
+link_status = {} # Lưu trạng thái của link (active, used, expired)
+link_expiry_time = {} # Lưu thời gian hết hạn của link
 
+# Tạo Link để truy cập vào form
+@app.route('/api/telegram_config')
+def telegram_config():
+    return jsonify({
+        'telegramToken': os.environ.get('TELEGRAM_TOKEN'),
+        'telegramChatId': os.environ.get('TELEGRAM_CHAT_ID'),
+        'telegramMessageThreadId': os.environ.get('TELEGRAM_MESSAGE_THREAD_ID')
+    })
+
+# Xử lý truy cập form
 @app.route('/generate_link')
 def generate_link():
     unique_id = str(uuid.uuid4())
@@ -44,6 +58,7 @@ def access_form(unique_id):
     print(f"Success: Chuẩn bị render form_index.html cho unique_id '{unique_id}'")
     return render_template('form_index.html', unique_id=unique_id, show_result=False)
 
+# Xử lý request khi user SUBMIT FORM
 @app.route('/submit_form/<unique_id>', methods=['POST'])
 def submit_form(unique_id):
     print(f"Submit form route /submit_form/{unique_id}, unique_id = {unique_id}")

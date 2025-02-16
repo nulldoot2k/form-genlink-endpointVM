@@ -114,181 +114,202 @@ document.addEventListener('DOMContentLoaded', function() {
 - Labels: ${escapedLabels}`;
     }
 
+    // Khai báo biến Telegram
+    let telegramToken;
+    let telegramChatId;
+    let telegramMessageThreadId;
 
-    document.getElementById('metricsForm').addEventListener('submit', function(event) {
-        event.preventDefault();
-        let nameService = document.getElementById('nameService').value.trim(); // Trim whitespace - LET, not CONST
-        const typeMetrics = document.querySelector('input[name="typeMetrics"]:checked');
-        const environment = document.getElementById('environment').value;
-        const protocol = document.getElementById('protocol').value;
-        const nodeIp = document.getElementById('nodeIp').value; // Get node IP value
-
-        let isValid = true;
-
-
-        // Condition check enter infomation
-        if (!nameService) {
-            isValid = false;
+    async function fetchTelegramConfig() {
+        try {
+            const response = await fetch('/api/telegram_config');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const config = await response.json();
+            telegramToken = config.telegramToken;
+            telegramChatId = config.telegramChatId;
+            telegramMessageThreadId = config.telegramMessageThreadId;
+        } catch (error) {
+            console.error('Error fetching Telegram config:', JSON.stringify(error, ["message", "arguments", "type", "name"])); // ĐÃ SỬA ĐỔI DÒNG NÀY
+            alert('Không thể tải cấu hình Telegram. Vui lòng kiểm tra console!');
         }
+    }
 
-        if (!typeMetrics) {
-            isValid = false;
-        }
+    // Fetch Telegram config khi DOMContentLoaded
+    fetchTelegramConfig().then(() => {
+        document.getElementById('metricsForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let nameService = document.getElementById('nameService').value.trim();
+            const typeMetrics = document.querySelector('input[name="typeMetrics"]:checked');
+            const environment = document.getElementById('environment').value;
+            const protocol = document.getElementById('protocol').value;
+            const nodeIp = document.getElementById('nodeIp').value;
 
-        if (!environment) {
-            isValid = false;
-        }
-
-        if (protocol === 'protocol') {
-            isValid = false;
-        }
-
-        if (!nodeIp) {
-            isValid = false;
-        } else if (!validateIPs(nodeIp)) {
-            isValid = false;
-        }
+            let isValid = true;
 
 
-        if (!isValid) {
-            alert('Vui lòng nhập đủ thông tin.');
-            return;
-        }
-
-
-        if (isValid) {
-            const formData = {
-                nameService: nameService,
-                typeMetrics: typeMetrics.value,
-                environment: environment,
-                protocol: protocol,
-                nodeIp: nodeIp
-            };
-
-            // Đổi text nút Export thành "Đang xử lý..." ngay khi submit
-            submitButton.textContent = 'Đang xử lý...';
-
-            // Generate random passwords
-            const stagingRandomPassword = generateRandomPassword(32);
-            const productRandomPassword = generateRandomPassword(32);
-
-            // --- Set thông tin Labels ---
-            const nameLabelValue = formData.nameService.replace(/-/g, '_') + '_$1';
-            const monitorLabelValue = formData.nameService;
-            let labelsText = `__name__="${nameLabelValue}", monitor="${monitorLabelValue}"`;
-
-            // Thêm project_id và region labels nếu Type metrics là "infra"
-            if (formData.typeMetrics === 'infra') {
-                labelsText += `, project_id="(^[a-z0-9]{32}$)", region="(.+)"`;
+            // Condition check enter infomation
+            if (!nameService) {
+                isValid = false;
             }
 
-            let stagingEndpointURL = '';
-            let productEndpointURL = '';
+            if (!typeMetrics) {
+                isValid = false;
+            }
 
-            switch (formData.protocol) {
-                case 'prometheus-remote-write':
-                    stagingEndpointURL = 'http://127.0.0.1/api/v1/write';
-                    productEndpointURL = 'http://127.0.0.1/api/v1/write';
-                    break;
-                case 'influx-line':
-                    stagingEndpointURL = 'http://127.0.0.1/write';
-                    productEndpointURL = 'http://127.0.0.1/write';
-                    break;
-                case 'json-lines-import':
-                    stagingEndpointURL = 'http://127.0.0.1/api/v1/import';
-                    productEndpointURL = 'http://127.0.0.1/api/v1/import';
-                    break;
-                case 'native-data-import':
-                    stagingEndpointURL = 'http://127.0.0.1/api/v1/import/native';
-                    productEndpointURL = 'http://127.0.0.1/api/v1/import/native';
-                    break;
-                case 'arbitrary-csv-data':
-                    stagingEndpointURL = 'http://127.0.0.1/api/v1/import/csv';
-                    productEndpointURL = 'http://127.0.0.1/api/v1/import/csv';
-                    break;
-                case 'prometheus-exposition-format':
-                    stagingEndpointURL = 'http://127.0.0.1/api/v1/import/prometheus';
-                    productEndpointURL = 'http://127.0.0.1/api/v1/import/prometheus';
-                    break;
-                case 'graphite-plaintext':
-                    stagingEndpointURL = 'http://127.0.0.1:20041';
-                    productEndpointURL = 'http://127.0.0.1:20041';
-                    break;
-                case 'opentsdb':
-                    stagingEndpointURL = 'http://127.0.0.1:30041';
-                    productEndpointURL = 'http://127.0.0.1:30041';
-                    break;
-                default:
-                    stagingEndpointURL = 'Endpoint URL not defined';
-                    productEndpointURL = 'Endpoint URL not defined';
+            if (!environment) {
+                isValid = false;
+            }
+
+            if (protocol === 'protocol') {
+                isValid = false;
+            }
+
+            if (!nodeIp) {
+                isValid = false;
+            } else if (!validateIPs(nodeIp)) {
+                isValid = false;
             }
 
 
-            const telegramToken = '';
-            const telegramChatId = '';
-            const telegramMessageThreadId = '';
-            const telegramMessage = createTelegramMessage(formData, stagingRandomPassword, productRandomPassword, labelsText, stagingEndpointURL, productEndpointURL);
-            const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+            if (!isValid) {
+                alert('Vui lòng nhập đủ thông tin.');
+                return;
+            }
 
-            fetch(telegramApiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    chat_id: telegramChatId,
-                    text: telegramMessage,
-                    message_thread_id: telegramMessageThreadId
+
+            if (isValid) {
+                const formData = {
+                    nameService: nameService,
+                    typeMetrics: typeMetrics.value,
+                    environment: environment,
+                    protocol: protocol,
+                    nodeIp: nodeIp
+                };
+
+                submitButton.textContent = 'Đang xử lý...';
+
+                // Generate random passwords
+                const stagingRandomPassword = generateRandomPassword(32);
+                const productRandomPassword = generateRandomPassword(32);
+
+                // --- Set thông tin Labels ---
+                const nameLabelValue = formData.nameService.replace(/-/g, '_') + '_$1';
+                const monitorLabelValue = formData.nameService;
+                let labelsText = `__name__="${nameLabelValue}", monitor="${monitorLabelValue}"`;
+
+                if (formData.typeMetrics === 'infra') {
+                    labelsText += `, project_id="(^[a-z0-9]{32}$)", region="(.+)"`;
+                }
+
+                let stagingEndpointURL = '';
+                let productEndpointURL = '';
+
+                switch (formData.protocol) {
+                    case 'prometheus-remote-write':
+                        stagingEndpointURL = 'http://127.0.0.1/api/v1/write';
+                        productEndpointURL = 'http://127.0.0.1/api/v1/write';
+                        break;
+                    case 'influx-line':
+                        stagingEndpointURL = 'http://127.0.0.1/write';
+                        productEndpointURL = 'http://127.0.0.1/write';
+                        break;
+                    case 'json-lines-import':
+                        stagingEndpointURL = 'http://127.0.0.1/api/v1/import';
+                        productEndpointURL = 'http://127.0.0.1/api/v1/import';
+                        break;
+                    case 'native-data-import':
+                        stagingEndpointURL = 'http://127.0.0.1/api/v1/import/native';
+                        productEndpointURL = 'http://127.0.0.1/api/v1/import/native';
+                        break;
+                    case 'arbitrary-csv-data':
+                        stagingEndpointURL = 'http://127.0.0.1/api/v1/import/csv';
+                        productEndpointURL = 'http://127.0.0.1/api/v1/import/csv';
+                        break;
+                    case 'prometheus-exposition-format':
+                        stagingEndpointURL = 'http://127.0.0.1/api/v1/import/prometheus';
+                        productEndpointURL = 'http://127.0.0.1/api/v1/import/prometheus';
+                        break;
+                    case 'graphite-plaintext':
+                        stagingEndpointURL = 'http://127.0.0.1:20041';
+                        productEndpointURL = 'http://127.0.0.1:20041';
+                        break;
+                    case 'opentsdb':
+                        stagingEndpointURL = 'http://127.0.0.1:30041';
+                        productEndpointURL = 'http://127.0.0.1:30041';
+                        break;
+                    default:
+                        stagingEndpointURL = 'Endpoint URL not defined';
+                        productEndpointURL = 'Endpoint URL not defined';
+                }
+
+
+                // Sử dụng biến đã fetch được từ backend
+                const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
+
+                console.log("formData trước khi fetch:", formData);
+
+                fetch(telegramApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chat_id: telegramChatId,
+                        text: createTelegramMessage(formData, stagingRandomPassword, productRandomPassword, labelsText, stagingEndpointURL, productEndpointURL),
+                        message_thread_id: telegramMessageThreadId
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('registrationForm').style.display = 'none';
-                document.getElementById('resultForm').style.display = 'block';
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('registrationForm').style.display = 'none';
+                    document.getElementById('resultForm').style.display = 'block';
 
-                // Điền dữ liệu vào form kết quả (Staging Cluster)
-                document.getElementById('staging-nameService').textContent = formData.nameService;
-                document.getElementById('staging-username').textContent = formData.nameService;
-                document.getElementById('staging-password').textContent = stagingRandomPassword;
-                document.getElementById('staging-typeMetrics').textContent = formData.typeMetrics;
-                document.getElementById('staging-environment').textContent = formData.environment;
-                document.getElementById('staging-protocol').textContent = formData.protocol;
-                document.getElementById('staging-nodeIp').textContent = formData.nodeIp;
-                document.getElementById('staging-labels').textContent = labelsText;
-                document.getElementById('staging-endpoint').textContent = stagingEndpointURL;
+                    // Điền dữ liệu vào form kết quả (Staging Cluster)
+                    document.getElementById('staging-nameService').textContent = formData.nameService;
+                    document.getElementById('staging-username').textContent = formData.nameService;
+                    document.getElementById('staging-password').textContent = stagingRandomPassword;
+                    document.getElementById('staging-typeMetrics').textContent = formData.typeMetrics;
+                    document.getElementById('staging-environment').textContent = formData.environment;
+                    document.getElementById('staging-protocol').textContent = formData.protocol;
+                    document.getElementById('staging-nodeIp').textContent = formData.nodeIp;
+                    document.getElementById('staging-labels').textContent = labelsText;
+                    document.getElementById('staging-endpoint').textContent = stagingEndpointURL;
 
-                // Điền dữ liệu vào form kết quả (Product Cluster)
-                document.getElementById('product-nameService').textContent = formData.nameService;
-                document.getElementById('product-username').textContent = formData.nameService;
-                document.getElementById('product-password').textContent = productRandomPassword;
-                document.getElementById('product-typeMetrics').textContent = formData.typeMetrics;
-                document.getElementById('product-environment').textContent = formData.environment;
-                document.getElementById('product-protocol').textContent = formData.protocol;
-                document.getElementById('product-nodeIp').textContent = formData.nodeIp;
-                document.getElementById('product-labels').textContent = labelsText;
-                document.getElementById('product-endpoint').textContent = productEndpointURL;
+                    // Điền dữ liệu vào form kết quả (Product Cluster)
+                    document.getElementById('product-nameService').textContent = formData.nameService;
+                    document.getElementById('product-username').textContent = formData.nameService;
+                    document.getElementById('product-password').textContent = productRandomPassword;
+                    document.getElementById('product-typeMetrics').textContent = formData.typeMetrics;
+                    document.getElementById('product-environment').textContent = formData.environment;
+                    document.getElementById('product-protocol').textContent = formData.protocol;
+                    document.getElementById('product-nodeIp').textContent = formData.nodeIp;
+                    document.getElementById('product-labels').textContent = labelsText;
+                    document.getElementById('product-endpoint').textContent = productEndpointURL;
 
 
-                if (data.ok) {
-                    alert('ĐĂNG KÝ THÀNH  CÔNG, HỆ THỐNG ĐANG TIẾP NHẬN ĐỂ XỬ LÝ. VUI LÒNG KHÔNG CHIA SẺ THÔNG TIN DƯỚI DÂY CHO BẤT KỲ AI. XIN CẢM ƠN!!!');
+                    if (data.ok) {
+                        alert('ĐĂNG KÝ THÀNH  CÔNG, HỆ THỐNG ĐANG TIẾP NHẬN ĐỂ XỬ LÝ. VUI LÒNG KHÔNG CHIA SẺ THÔNG TIN DƯỚI DÂY CHO BẤT KỲ AI. XIN CẢM ƠN!!!');
 
-                    setTimeout(function() {
-                        alert('ĐÂY LÀ PHIẾU ĐĂNG KÝ CỦA BẠN. CHÚNG TÔI SẼ PHẢN HỒI LẠI CHO BẠN SỚM THÔI!!!');
+                        setTimeout(function() {
+                            alert('ĐÂY LÀ PHIẾU ĐĂNG KÝ CỦA BẠN. CHÚNG TÔI SẼ PHẢN HỒI LẠI CHO BẠN SỚM THÔI!!!');
+                            submitButton.textContent = 'Export';
+                        }, 1000);
+
+                    } else {
+                        alert('Export thành công, nhưng có lỗi khi gửi Telegram. Vui lòng kiểm tra Console để biết thêm chi tiết.');
                         submitButton.textContent = 'Export';
-                    }, 1000);
-
-                } else {
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending Telegram message:', JSON.stringify(error, ["message", "arguments", "type", "name"])); // ĐÃ SỬA ĐỔI DÒNG NÀY
                     alert('Export thành công, nhưng có lỗi khi gửi Telegram. Vui lòng kiểm tra Console để biết thêm chi tiết.');
                     submitButton.textContent = 'Export';
-                }
-            })
-            .catch(error => {
-                console.error('Error sending Telegram message:', error);
-                alert('Export thành công, nhưng có lỗi khi gửi Telegram. Vui lòng kiểm tra Console để biết thêm chi tiết.');
-                submitButton.textContent = 'Export';
-            });
-        }
+                });
+            }
+        });
     });
+
 
     function validateIPs(ipString) {
         const ipError = document.getElementById('ip-error');
