@@ -86,7 +86,7 @@ docker-compose up -d
 5. **Điền biểu mẫu:** Người nhận liên kết truy cập và điền đầy đủ thông tin vào biểu mẫu đăng ký.
 6. **Nhận kết quả:** Sau khi nhập đủ thông tin, nhấn **Export**. Phiếu đăng ký sẽ hiển thị thông tin.
 
-![notify telegram](https://ik.imagekit.io/kitto2k/tech/tutorial-markdown/form-registry.png?updatedAt=1739718601819) 
+![form results](https://ik.imagekit.io/kitto2k/tech/tutorial-markdown/form-results.png?updatedAt=1739719452424) 
 
 7. **Thông báo Telegram:**  Kết quả sẽ được gửi về tele với mẫu thông tin từ người dùng, khách hàng.
 
