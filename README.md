@@ -1,47 +1,95 @@
-# Ứng dụng Tạo Liên Kết Đăng Ký Endpoint Metrics Một Lần Dùng
+# Form Registry Endpoint
+
+Ứng dụng Web cho phép tạo phiếu đăng ký nhanh chóng, chia sẻ liên kết duy nhất và bắn kết quả về telegram.
 
 ## Giới thiệu
 
-Dự án này cung cấp một dịch vụ web đơn giản để tạo ra các liên kết một lần sử dụng, phục vụ cho việc đăng ký endpoint metrics. Ứng dụng được xây dựng nhằm mục đích đơn giản hóa quá trình thu thập thông tin cần thiết khi tích hợp các dịch vụ và hạ tầng vào hệ thống giám sát metrics, ví dụ như VictoriaMetrics.
+Form Registry Endpoint là một ứng dụng web được thiết kế để đơn giản hóa quá trình tiếp nhận thông tin thông qua các form trực tuyến. Ứng dụng này cung cấp hai giao diện form chính:
 
-Điểm đặc biệt của ứng dụng là các liên kết được tạo ra chỉ có giá trị trong vòng 10 phút và cho phép truy cập duy nhất một lần. Điều này giúp tăng cường tính bảo mật và kiểm soát việc sử dụng liên kết, tránh lạm dụng hoặc truy cập trái phép.
 
-## Tính năng chính
+**Form GenLink**: Dành cho người quản trị, cho phép tạo ra các đường liên kết ngẫu nhiên. Mỗi liên kết này có giới hạn thời gian (10 phút theo mặc định) và chỉ áp dụng cho 1 lần duy nhất. Chức năng chính của trang form GenLink là tạo và sao chép các liên kết này để chia sẻ cho người dùng, đặc biệc là khách hàng muốn tạo phiếu đăng ký.
 
-- **Tạo liên kết một lần dùng:**  Dễ dàng tạo ra các liên kết duy nhất cho biểu mẫu đăng ký metrics.
-- **Thời hạn liên kết:** Mỗi liên kết chỉ có hiệu lực trong 10 phút, đảm bảo tính kịp thời và kiểm soát.
-- **Truy cập duy nhất:** Mỗi liên kết chỉ được phép truy cập một lần, tăng cường bảo mật thông tin đăng ký.
-- **Giao diện thân thiện:**  Giao diện web đơn giản, dễ sử dụng để tạo liên kết.
-- **Biểu mẫu đăng ký chi tiết:**  Cung cấp biểu mẫu thu thập đầy đủ thông tin cần thiết cho việc đăng ký metrics của dịch vụ và hạ tầng.
-- **Triển khai dễ dàng với Docker:**  Đóng gói và triển khai ứng dụng một cách nhanh chóng và nhất quán với Docker.
-- **Gửi thông báo Telegram (Tùy chọn):**  Sau khi người dùng hoàn tất đăng ký, thông tin có thể được gửi trực tiếp đến kênh Telegram của admin để xử lý (tính năng này cần được cấu hình ở backend).
+**Form Registry**: Người dùng, khách hàng nhập thông tin đăng ký, nhận kết quả phiếu đăng ký cùng với thông báo từ hệ thống. Đồng thời, thông báo kết quả cũng sẽ được gửi đến người quản trị qua Telegram.
+
+## Tính năng
+
+- Liên kết duy nhất: Mỗi liên kết được tạo ra chỉ có thể truy cập và sử dụng duy nhất một lần, tăng cường tính bảo mật và kiểm soát việc thu thập dữ liệu.
+- Thời hạn liên kết: Liên kết chỉ có hiệu lực trong một khoảng thời gian giới hạn (10 phút), tránh việc lạm dụng liên kết.
+- Dễ dàng triển khai với Container: Ứng dụng được đóng gói hoàn toàn bằng Docker và Docker Compose, giúp việc cài đặt và triển khai trở nên nhanh chóng và dễ dàng trên mọi nền tảng hỗ trợ Docker.
+- Tunneling với Ngrok: Sử dụng Ngrok để tạo tunnel, cho phép ứng dụng có thể truy cập công khai trên internet một cách nhanh chóng mà không cần cấu hình phức tạp về mạng.
+- Thông báo Telegram: Người quản trị có thể nhận được thông báo qua Telegram mỗi khi có người dùng hoàn thành và gửi form, giúp theo dõi dữ liệu thu thập một cách hiệu quả.
+- Giao diện đơn giản và dễ sử dụng: Cả form GenLink và form Registry đều có giao diện trực quan, dễ dàng thao tác cho cả người quản trị và người dùng cuối.
+
+## Cấu trúc thư mục
+
+```bash
+├── Dockerfile # Tập tin đóng gói Docker.
+├── docker-compose.yml #  Tập tin triển khai Docker Compose.
+├── generator.py # Tập tin chứa logic chính của ứng dụng web.
+├── requirements.txt # Tập tin chứa thư viện cần thiết.
+├── .env # Tập tin chứa các thông tin nhạy cảm
+└── templates # Thư mục chứa dự án web.
+    ├── form_index.html # form Registry.
+    ├── form_script.js # script Registry.
+    ├── form_styles.css # style Registry.
+    ├── index.html # form GenLink.
+    └── style.css # stype GenLink.
+```
+
+## Bắt đầu nhanh
+
+**Chú ý:** [Docker và docker-compose](https://docs.docker.com/compose/install/) phải được cài đặt.
+
+Cần có 1 tài khoản [Ngork](https://dashboard.ngrok.com/) Login. Sau đó truy cập vào [Your Authtoken](https://dashboard.ngrok.com/get-started/your-authtoken) để lấy token và [domain name](https://dashboard.ngrok.com/domains) đăng ký.
+
+![your-authtoken-ngork](https://ik.imagekit.io/kitto2k/tech/tutorial-markdown/your-authtoken-ngork.png?updatedAt=1739715996688) 
+
+Cần có 1 tài khoản [Telegram Login](https://desktop.telegram.org/?setln=en). Chứa các thông tin về telegram như token, chat_id và thread_id.
+
+![How to get sentitive telegram](https://ik.imagekit.io/kitto2k/tech/tutorial-markdown/how-to-get-telegram-bot-chat-id.png?updatedAt=1739716463191) 
+
+### Bổ xung sensitive .env
+
+```env
+TOKEN_NGORK='2abcdefghijk_1234567890AbCdEfGhIj'
+HOST_NGORK='form-registry.example.link'
+SECRET_FLASK='aVeryLongAndRandomSecretKey_AvoidSimpleWords'
+BASIC_AUTH_USERNAME='admin'
+BASIC_AUTH_PASSWORD='StrongPassword123!@#$'
+TELEGRAM_TOKEN='1234567890:AbCdEfGhIjKlMnOpQrStUvWxYz1234567890'
+TELEGRAM_CHAT_ID='-1001234567890'
+TELEGRAM_MESSAGE_THREAD_ID='123'
+```
+
+### Vụt docker-compose
+
+```bash
+docker-compose up -d
+--->
+[+] Running 3/3
+ ✔ Network form-register-vm_default   Created   0.0s
+ ✔ Container web                      Started   0.5s
+ ✔ Container ngrok                    Started   0.7s
+```
 
 ## Cách sử dụng
 
-1. **Truy cập trang chủ:** Mở trình duyệt và truy cập vào trang chủ của ứng dụng.
-2. **Nhấn nút "Tao Link":**  Click vào nút **Tao Link** (Tạo Liên Kết) trên trang chủ.
-3. **Nhận liên kết:** Một liên kết duy nhất và một lần sử dụng sẽ được tạo ra ngay lập tức.
-4. **Chia sẻ liên kết:**  Sao chép và chia sẻ liên kết này cho người cần đăng ký endpoint metrics.
-5. **Điền biểu mẫu:** Người nhận liên kết truy cập và điền đầy đủ thông tin vào biểu mẫu đăng ký metrics.
-6. **Xem thông tin đăng ký:** Sau khi hoàn tất biểu mẫu, thông tin đăng ký sẽ được hiển thị trên trang kết quả.
-7. **Thông báo Telegram (nếu được cấu hình):**  Nếu tính năng Telegram được kích hoạt ở backend, admin sẽ nhận được thông báo về đăng ký mới qua kênh Telegram.
+![form genlink](https://ik.imagekit.io/kitto2k/tech/tutorial-markdown/form-genlink.png?updatedAt=1739717711548) 
 
-**Lưu ý về Telegram:**
+1. **Truy cập trang chủ:** Mở trình duyệt và truy cập với host site đã đăng ký.
+2. **Nhấn nút "Tạo Link":**  Click vào nút **Tạo Link** (Tạo Liên Kết) trên trang chủ.
+3. **Nhận liên kết:** Một liên kết duy nhất sẽ được tạo ra ngay lập tức.
+4. **Chia sẻ liên kết:**  Sao chép và chia sẻ đường link này cho người cần phiếu đăng ký dịch vụ.
 
-> Tính năng gửi thông báo Telegram là **tùy chọn** và có thể cần được cấu hình thêm ở phía backend của ứng dụng (ví dụ: thêm thư viện `python-telegram-bot`, bot token, và logic gửi tin nhắn). Trong mã nguồn mẫu này, tính năng Telegram chưa được triển khai trực tiếp.
+![form registry](https://ik.imagekit.io/kitto2k/tech/tutorial-markdown/form-registry.png?updatedAt=1739718601819) 
 
-## Triển khai với Docker
+5. **Điền biểu mẫu:** Người nhận liên kết truy cập và điền đầy đủ thông tin vào biểu mẫu đăng ký.
+6. **Nhận kết quả:** Sau khi nhập đủ thông tin, nhấn **Export**. Phiếu đăng ký sẽ hiển thị thông tin.
 
-Để triển khai ứng dụng này bằng Docker, bạn cần thực hiện các bước sau:
+![notify telegram](https://ik.imagekit.io/kitto2k/tech/tutorial-markdown/form-registry.png?updatedAt=1739718601819) 
 
-1. **Build Docker image:**  Sử dụng Dockerfile đã cung cấp để build image.
+7. **Thông báo Telegram:**  Kết quả sẽ được gửi về tele với mẫu thông tin từ người dùng, khách hàng.
 
-```bash
-docker build -t endpoint-metrics-generator .
-```
+![form notify telegram](https://ik.imagekit.io/kitto2k/tech/tutorial-markdown/form-notiofy-telegram.png?updatedAt=1739718839871) 
 
-2. **Chạy Docker container**: Khởi chạy container và map port 20030 của container ra ngoài host.
-
-```bash
-docker run -d --name generator-link -p 80:8080 generator-link
-```
+## Thanks for reading!!!
