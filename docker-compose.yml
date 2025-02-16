@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    container_name: web
+    ports:
+      - "8080:80"
+    environment:
+      SECRET_FLASK: ${SECRET_FLASK}
+      HOST_NGORK: ${HOST_NGORK}
+      BASIC_AUTH_USERNAME: ${BASIC_AUTH_USERNAME}
+      BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD}
+      TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      TELEGRAM_MESSAGE_THREAD_ID: ${TELEGRAM_MESSAGE_THREAD_ID}
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ngrok
+    environment:
+      NGROK_AUTHTOKEN: ${TOKEN_NGORK} 
+      HOST_NGORK: ${HOST_NGORK}
+    command: 
+      - "http"
+      - "--domain=$HOST_NGORK" 
+      - "web:80"
+    depends_on:
+      - web
