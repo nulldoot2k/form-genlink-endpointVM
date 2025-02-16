@@ -1,0 +1,236 @@
+body {
+    font-family: arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.form-container {
+    background-color: #ffe4e1;
+    padding: 30px;
+    border-radius: 10px;
+    border: 2px solid #e0b0b0;
+    box-shadow: 5px 5px 10px #ccc;
+    width: 90%;
+    max-width: 500px;
+    min-width: 400px;
+}
+
+.form-title {
+    text-align: center;
+    color: #ff0000;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+}
+
+.form-group label {
+    display: inline-block;
+    margin-bottom: 0;
+    margin-right: 10px;
+    font-weight: bold;
+    width: 120px;
+    text-align: left;
+    flex-grow: 0;
+}
+
+.form-group input[type="text"],
+.form-group select,
+.environment-select,
+.protocol-select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+.form-group select[multiple] {
+    height: auto;
+}
+
+.form-group .radio-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+.form-group .radio-group label {
+    font-weight: normal;
+    width: auto;
+    text-align: left;
+    margin-right: 15px;
+    margin-top: 2px;
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.form-group .radio-group input[type="radio"] {
+    margin-right: 5px;
+    margin-top: -2px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+
+.export-button {
+    background-color: #4285f4;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    display: block;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.export-button:hover {
+    background-color: #3367d6;
+}
+
+.environment-select,
+.protocol-select {
+    position: relative;
+    cursor: pointer;
+    flex: 1;
+    min-width: 0;
+}
+
+.environment-current-selection,
+.protocol-current-selection {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.environment-options,
+.protocol-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    background-color: white;
+    z-index: 10;
+    display: none;
+    overflow-y: auto;
+    max-height: 150px;
+}
+
+.environment-options.show,
+.protocol-options.show {
+    display: block;
+}
+
+.environment-option-item,
+.protocol-option-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.environment-option-item:hover,
+.environment-option-item.selected,
+.protocol-option-item:hover,
+.protocol-option-item.selected {
+    background-color: #e0e0e0;
+}
+
+.environment-option-item.selected::after,
+.protocol-option-item.selected::after {
+    content: '✓';
+    float: right;
+    margin-left: 10px;
+    color: green;
+}
+
+#environment,
+#protocol {
+    display: none;
+}
+
+.note-ip-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9em;
+}
+
+.result-container {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 5px #ddd;
+    width: 90%;
+    max-width: 800px;
+    margin-top: 20px;
+    font-family: monospace;
+    line-height: 1.6;
+}
+
+.result-title {
+    text-align: center;
+    color: #007bff;
+    margin-bottom: 20px;
+}
+
+.cluster-info {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 2px 2px 3px #eee;
+}
+
+.cluster-name {
+    color: #28a745;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.info-label {
+    font-weight: bold;
+    width: 150px;
+    margin-right: 10px;
+    text-align: left;
+}
+
+.info-value {
+    flex: 1;
+}

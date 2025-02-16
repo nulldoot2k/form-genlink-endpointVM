@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generator Only One</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Chào mừng!</h1>
+        <p>Đây là ứng dụng tạo liên kết một lần dùng.<br>
+        Mỗi liên kết có thời hạn là 10p cho 1 lượt truy cập.<br>
+        Vui lòng không reload hay F5 khi sử dụng liên kết.</p>
+        <button id="generator">Tạo Link</button>
+        <div id="link-area" style="display:none;">
+            <p>Liên kết của bạn:</p>
+            <input type="text" id="link-input" readonly>
+            <button id="copy-button">Sao chép</button>
+        </div>
+    </div>
+    <script>
+        const generatorButton = document.getElementById('generator');
+        const linkArea = document.getElementById('link-area');
+        const linkInput = document.getElementById('link-input');
+        const copyButton = document.getElementById('copy-button');
+
+        generatorButton.addEventListener('click', () => {
+            fetch('/generate_link')
+                .then(response => response.text())
+                .then(link => {
+                    linkInput.value = link;
+                    linkArea.style.display = 'block';
+                });
+        });
+
+        copyButton.addEventListener('click', () => {
+            linkInput.select();
+            document.execCommand('copy');
+        });
+    </script>
+</body>
+</html>

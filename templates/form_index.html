@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng Đăng Ký Cấp EndPoint Metrics</title>
+    <!-- <link rel="stylesheet" type="text/css" href="form_styles.css"> -->
+    <link href="{{ url_for('static', filename='./form_styles.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<div class="form-container" id="registrationForm">
+    <h2 class="form-title">Bảng Đăng Ký Cấp EndPoint Metrics</h2>
+    <form id="metricsForm">
+        <div class="form-group">
+            <label for="nameService">Name Service:</label>
+            <input type="text" id="nameService" name="nameService" placeholder="Nhập tên dịch vụ cần đăng ký vào đây..." required>
+        </div>
+
+        <div class="form-group">
+            <label>Type metrics:</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" id="typeService" name="typeMetrics" value="service">
+                    service
+                </label>
+                <label class="radio-label">
+                    <input type="radio" id="typeInfra" name="typeMetrics" value="infra">
+                    infra
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group environment-group">
+            <label for="environment">Environment:</label>
+            <div class="environment-select">
+                <div class="environment-current-selection" id="currentEnvironmentSelection">Chọn môi trường</div>
+                <div class="environment-options" id="environment-options">
+                    <div class="environment-option-item" data-value="public-service-staging">public-service-staging</div>
+                    <div class="environment-option-item" data-value="public-service-production">public-service-production</div>
+                    <div class="environment-option-item" data-value="public-service-development">public-service-development</div>
+                    <div class="environment-option-item" data-value="public-infra">public-infra</div>
+                    <div class="environment-option-item" data-value="staging-infra">staging-infra</div>
+                    <div class="environment-option-item" data-value="private-infra">private-infra</div>
+                    <div class="environment-option-item" data-value="private-service-staging">private-service-staging</div>
+                    <div class="environment-option-item" data-value="private-service-production">private-service-production</div>
+                    <div class="environment-option-item" data-value="private-service-development">private-service-development</div>
+                </div>
+            </div>
+            <input type="hidden" id="environment" name="environment">
+        </div>
+
+
+        <div class="form-group protocol-group">
+            <label for="protocol">Protocol:</label>
+            <div class="protocol-select">
+                <div class="protocol-current-selection" id="currentProtocolSelection">Chọn giao thức</div>
+                <div class="protocol-options" id="protocol-options">
+                    <div class="protocol-option-item" data-value="prometheus-remote-write">Prometheus remote write protocol</div>
+                    <div class="protocol-option-item" data-value="influx-line">Influx line protocol</div>
+                    <div class="protocol-option-item" data-value="json-lines-import">JSON lines import protocol</div>
+                    <div class="protocol-option-item" data-value="native-data-import">Native data import protocol</div>
+                    <div class="protocol-option-item" data-value="arbitrary-csv-data">Arbitrary CSV data</div>
+                    <div class="protocol-option-item" data-value="prometheus-exposition-format">Data in Prometheus exposition format</div>
+                    <div class="protocol-option-item" data-value="graphite-plaintext">Graphite plaintext protocol</div>
+                    <div class="protocol-option-item" data-value="opentsdb">OpenTSDB telnet and http protocols</div>
+                </div>
+            </div>
+            <input type="hidden" id="protocol" name="protocol" value="protocol">
+        </div>
+
+        <div class="form-group">
+            <label for="nodeIp">Node IP:</label>
+            <input type="text" id="nodeIp" class="node-ip-input" name="nodeIp" placeholder="Node IP, được phân tách bằng dấu phẩy(,)" required>
+            <div id="ip-error" class="error-message"></div>
+        </div>
+
+        <button type="submit" id="submitButton" class="export-button">Export</button>
+    </form>
+</div>
+
+<div class="result-container" id="resultForm" style="display:none;">
+    <h2 class="result-title">Thông Tin Đăng Ký EndPoint Metrics</h2>
+
+    <div class="cluster-info">
+        <h3 class="cluster-name">Information - Victoria Metrics Staging Cluster</h3>
+        <div class="info-row">
+            <span class="info-label">Name Service:</span>
+            <span class="info-value" id="staging-nameService"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Username:</span>
+            <span class="info-value" id="staging-username">network-abcxyz</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Password:</span>
+            <span class="info-value" id="staging-password">random-password</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Type metrics:</span>
+            <span class="info-value" id="staging-typeMetrics"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Environment:</span>
+            <span class="info-value" id="staging-environment"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Protocol:</span>
+            <span class="info-value" id="staging-protocol"></span>
+        </div>
+        <div class="info-row">
+           <span class="info-label">Endpoint:</span> <span class="info-value" id="staging-endpoint"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Node IP:</span>
+            <span class="info-value" id="staging-nodeIp"></span>
+        </div>
+        <div class="info-row labels-row" id="staging-labels-row"> <div class="info-label">Labels:</div>
+            <span class="info-value" id="staging-labels"></span>
+        </div>
+    </div>
+
+    <div class="cluster-info">
+        <h3 class="cluster-name">Information Victoria Metrics Product Cluster</h3>
+        <div class="info-row">
+            <span class="info-label">Name Service:</span>
+            <span class="info-value" id="product-nameService">network-service</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Username:</span>
+            <span class="info-value" id="product-username">network-abcxyz</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Password:</span>
+            <span class="info-value" id="product-password">random-password</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Type metrics:</span>
+            <span class="info-value" id="product-typeMetrics">service</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Environment:</span>
+            <span class="info-value" id="product-environment">public-service-production, public-service-development, private-service-production</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Protocol:</span>
+            <span class="info-value" id="product-protocol">influxdb</span>
+        </div>
+         <div class="info-row">
+            <span class="info-label">Endpoint:</span> <span class="info-value" id="product-endpoint"></span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Node IP:</span>
+            <span class="info-value" id="product-nodeIp"></span>
+        </div>
+         <div class="info-row labels-row" id="product-labels-row"> <div class="info-label">Labels:</div>
+            <span class="info-value" id="product-labels"></span>
+        </div>
+    </div>
+</div>
+
+<!-- <script src="form_script.js"></script> -->
+<script src="{{ url_for('static', filename='./form_script.js') }}"></script>
+</body>
+</html>
