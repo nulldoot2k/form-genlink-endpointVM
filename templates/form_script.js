@@ -5,27 +5,69 @@ document.addEventListener('DOMContentLoaded', function() {
     const environmentInput = document.getElementById('environment');
     const currentEnvironmentSelection = document.getElementById('currentEnvironmentSelection');
     const environmentSelectDiv = document.querySelector('.environment-select');
-
     const protocolOptionsContainer = document.getElementById('protocol-options');
     const protocolInput = document.getElementById('protocol');
     const currentProtocolSelection = document.getElementById('currentProtocolSelection');
     const protocolSelectDiv = document.querySelector('.protocol-select');
-
     const nameServiceInput = document.getElementById('nameService');
     const nodeIpInput = document.getElementById('nodeIp');
     const typeServiceRadio = document.getElementById('typeService');
     const typeInfraRadio = document.getElementById('typeInfra');
     const submitButton = document.getElementById('submitButton');
+    const typeMetricsRadios = document.querySelectorAll('input[name="typeMetrics"]');
+
+    const infoIcons = document.querySelectorAll('.info-icon');
+    const infoModals = document.querySelectorAll('.info-modal');
+    const infoModalCloses = document.querySelectorAll('.info-modal-close');
+
+    // 1. Environment options based on Type metrics
+    const serviceEnvironments = [
+        { value: 'public-service-production', display: 'public-service-production - 2201' },
+        { value: 'public-service-staging', display: 'public-service-staging - 2202' },
+        { value: 'public-service-development', display: 'public-service-development - 2203' }
+    ];
+
+    const infraEnvironments = [
+        { value: 'staging-infra', display: 'staging-infra - 3100' },
+        { value: 'public-infra', display: 'public-infra - 2100' },
+        { value: 'private-infra', display: 'private-infra - 1100' },
+        { value: 'private-service-production', display: 'private-service-production - 1201' },
+        { value: 'private-service-staging', display: 'private-service-staging - 1202' },
+        { value: 'private-service-development', display: 'private-service-development - 1203' }
+    ];
 
     let selectedEnvironments = [];
     let selectedProtocol = 'protocol';
+    let currentTypeMetrics = null;
 
+    function clearEnvironmentSelection() {
+        selectedEnvironments = [];
+        environmentInput.value = '';
+        currentEnvironmentSelection.textContent = 'Chọn môi trường';
+        document.querySelectorAll('.environment-option-item.selected').forEach(item => {
+            item.classList.remove('selected');
+        });
+    }
+
+    function populateEnvironmentOptions(options) {
+        environmentOptionsContainer.innerHTML = ''; // Clear existing options
+        options.forEach(option => {
+            const optionDiv = document.createElement('div');
+            optionDiv.classList.add('environment-option-item');
+            optionDiv.dataset.value = option.value;
+            optionDiv.textContent = option.value; // Dropdown chỉ hiển thị value (tên môi trường)
+            environmentOptionsContainer.appendChild(optionDiv);
+        });
+    }
+
+    // Event listener for opening environment options
     currentEnvironmentSelection.addEventListener('click', function() {
+        const typeMetricsChecked = document.querySelector('input[name="typeMetrics"]:checked');
+        if (!typeMetricsChecked) {
+            alert("Vui lòng chọn Type Metrics");
+            return;
+        }
         environmentOptionsContainer.classList.toggle('show');
-    });
-
-    currentProtocolSelection.addEventListener('click', function() {
-        protocolOptionsContainer.classList.toggle('show');
     });
 
     environmentOptionsContainer.addEventListener('click', function(event) {
@@ -53,16 +95,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    currentProtocolSelection.addEventListener('click', function() {
+        protocolOptionsContainer.classList.toggle('show');
+    });
+
     function updateCurrentEnvironmentSelectionText() {
         if (selectedEnvironments.length > 0) {
-            currentEnvironmentSelection.textContent = selectedEnvironments.join(', ');
+            const displayTexts = selectedEnvironments.map(envValue => {
+                let displayText = envValue;
+                let selectedOption;
+                if (currentTypeMetrics === 'service') {
+                    selectedOption = serviceEnvironments.find(opt => opt.value === envValue);
+                } else if (currentTypeMetrics === 'infra') {
+                    selectedOption = infraEnvironments.find(opt => opt.value === envValue);
+                }
+                return selectedOption ? selectedOption.value : displayText;
+            });
+            currentEnvironmentSelection.textContent = displayTexts.join(', ');
         } else {
             currentEnvironmentSelection.textContent = 'Chọn môi trường';
         }
     }
 
     function updateCurrentProtocolSelectionText() {
-        currentProtocolSelection.textContent = selectedProtocol;
+        const selectedOption = protocolOptionsContainer.querySelector(`.protocol-option-item[data-value="${selectedProtocol}"]`);
+        if (selectedOption) {
+            currentProtocolSelection.textContent = selectedOption.textContent;
+        } else {
+            currentProtocolSelection.textContent = 'Chọn giao thức'; // Fallback text
+        }
     }
 
     // Function to generate a random password
@@ -80,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return text;
     }
 
-
     function createTelegramMessage(formData, stagingPassword, productPassword, labelsText, stagingEndpointURL, productEndpointURL) {
         const escapedStagingPassword = escapeMarkdownV2(stagingPassword);
         const escapedProductPassword = escapeMarkdownV2(productPassword);
@@ -89,6 +149,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const escapedStagingEndpointURL = escapeMarkdownV2(stagingEndpointURL);
         const escapedProductEndpointURL = escapeMarkdownV2(productEndpointURL);
 
+        // Tạo text environment với port cho kết quả
+        let environmentResultText = '';
+        if (selectedEnvironments.length > 0) {
+            environmentResultText = selectedEnvironments.map(envValue => {
+                let selectedOption;
+                if (currentTypeMetrics === 'service') {
+                    selectedOption = serviceEnvironments.find(opt => opt.value === envValue);
+                } else if (currentTypeMetrics === 'infra') {
+                    selectedOption = infraEnvironments.find(opt => opt.value === envValue);
+                }
+                return selectedOption ? selectedOption.display : envValue; // Sử dụng option.display để có port
+            }).join(', ');
+        }
+
         return `🔔THÔNG TIN ĐĂNG KÝ ENDPOINT METRICS
 
 🐦INFORMATION - VICTORIA METRICS STAGING CLUSTER
@@ -96,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
 - Username: ${formData.nameService}
 - Password: ${escapedStagingPassword}
 - Type metrics: ${formData.typeMetrics}
-- Environment: ${formData.environment}
+- Environment: ${environmentResultText}
 - Protocol: ${formData.protocol}
 - Endpoint: ${escapedStagingEndpointURL}
 - Node IP: ${escapedNodeIp}
@@ -107,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
 - Username: ${formData.nameService}
 - Password: ${escapedProductPassword}
 - Type metrics: ${formData.typeMetrics}
-- Environment: ${formData.environment}
+- Environment: ${environmentResultText}
 - Protocol: ${formData.protocol}
 - Endpoint: ${escapedProductEndpointURL}
 - Node IP: ${escapedNodeIp}
@@ -130,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
             telegramChatId = config.telegramChatId;
             telegramMessageThreadId = config.telegramMessageThreadId;
         } catch (error) {
-            console.error('Error fetching Telegram config:', JSON.stringify(error, ["message", "arguments", "type", "name"])); // ĐÃ SỬA ĐỔI DÒNG NÀY
+            console.error('Error fetching Telegram config:', JSON.stringify(error, ["message", "arguments", "type", "name"]));
             alert('Không thể tải cấu hình Telegram. Vui lòng kiểm tra console!');
         }
     }
@@ -247,7 +321,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Sử dụng biến đã fetch được từ backend
                 const telegramApiUrl = `https://api.telegram.org/bot${telegramToken}/sendMessage`;
 
-                console.log("formData trước khi fetch:", formData);
 
                 fetch(telegramApiUrl, {
                     method: 'POST',
@@ -265,12 +338,27 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('registrationForm').style.display = 'none';
                     document.getElementById('resultForm').style.display = 'block';
 
+                    // Tạo text environment với port cho kết quả hiển thị
+                    let environmentResultTextDisplay = '';
+                    if (selectedEnvironments.length > 0) {
+                        environmentResultTextDisplay = selectedEnvironments.map(envValue => {
+                            let selectedOption;
+                            if (currentTypeMetrics === 'service') {
+                                selectedOption = serviceEnvironments.find(opt => opt.value === envValue);
+                            } else if (currentTypeMetrics === 'infra') {
+                                selectedOption = infraEnvironments.find(opt => opt.value === envValue);
+                            }
+                            return selectedOption ? selectedOption.display : envValue;
+                        }).join(', ');
+                    }
+
+
                     // Điền dữ liệu vào form kết quả (Staging Cluster)
                     document.getElementById('staging-nameService').textContent = formData.nameService;
                     document.getElementById('staging-username').textContent = formData.nameService;
                     document.getElementById('staging-password').textContent = stagingRandomPassword;
                     document.getElementById('staging-typeMetrics').textContent = formData.typeMetrics;
-                    document.getElementById('staging-environment').textContent = formData.environment;
+                    document.getElementById('staging-environment').textContent = environmentResultTextDisplay;
                     document.getElementById('staging-protocol').textContent = formData.protocol;
                     document.getElementById('staging-nodeIp').textContent = formData.nodeIp;
                     document.getElementById('staging-labels').textContent = labelsText;
@@ -281,7 +369,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('product-username').textContent = formData.nameService;
                     document.getElementById('product-password').textContent = productRandomPassword;
                     document.getElementById('product-typeMetrics').textContent = formData.typeMetrics;
-                    document.getElementById('product-environment').textContent = formData.environment;
+                    document.getElementById('product-environment').textContent = environmentResultTextDisplay;
                     document.getElementById('product-protocol').textContent = formData.protocol;
                     document.getElementById('product-nodeIp').textContent = formData.nodeIp;
                     document.getElementById('product-labels').textContent = labelsText;
@@ -302,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 })
                 .catch(error => {
-                    console.error('Error sending Telegram message:', JSON.stringify(error, ["message", "arguments", "type", "name"])); // ĐÃ SỬA ĐỔI DÒNG NÀY
+                    console.error('Error sending Telegram message:', JSON.stringify(error, ["message", "arguments", "type", "name"]));
                     alert('Export thành công, nhưng có lỗi khi gửi Telegram. Vui lòng kiểm tra Console để biết thêm chi tiết.');
                     submitButton.textContent = 'Export';
                 });
@@ -354,6 +442,65 @@ document.addEventListener('DOMContentLoaded', function() {
     function removeDiacritics(str) {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
+
+    // --- Type Metrics Radio change event ---
+    typeMetricsRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            clearEnvironmentSelection(); // Reset Environment Selection when Type Metrics changes
+            currentTypeMetrics = this.value; // Update currentTypeMetrics
+
+            if (this.value === 'service') {
+                populateEnvironmentOptions(serviceEnvironments);
+            } else if (this.value === 'infra') {
+                populateEnvironmentOptions(infraEnvironments);
+            }
+        });
+    });
+
+    // --- Icon results details ---
+    infoIcons.forEach(icon => {
+        icon.addEventListener('click', function(event) {
+            event.preventDefault();
+
+            const targetModalId = this.dataset.target;
+            const modal = document.getElementById(targetModalId);
+            const labelDetailParagraphId = targetModalId === 'staging-labels-modal' ? 'staging-labels-detail' : 'product-labels-detail';
+            const labelDetailParagraph = document.getElementById(labelDetailParagraphId);
+
+            // Lấy thông tin chi tiết từ các .info-row và format lại (giữ nguyên logic này)
+            let detailedInfoText = "";
+            const clusterInfoDiv = this.closest('.cluster-info');
+            const infoRows = clusterInfoDiv.querySelectorAll('.info-row');
+
+            infoRows.forEach(row => {
+                const labelSpan = row.querySelector('.info-label');
+                const valueSpan = row.querySelector('.info-value');
+                if (labelSpan && valueSpan) {
+                    detailedInfoText += `- ${labelSpan.textContent.trim()} ${valueSpan.textContent.trim()}\n`;
+                }
+            });
+
+            labelDetailParagraph.textContent = detailedInfoText.trim();
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        });
+    });
+
+    infoModalCloses.forEach(closeBtn => {
+        closeBtn.addEventListener('click', function() {
+            const targetModalId = this.dataset.target;
+            const modal = document.getElementById(targetModalId);
+            modal.style.display = 'none';
+        });
+    });
+
+    window.addEventListener('click', function(event) {
+        infoModals.forEach(modal => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        });
+    });
+    // --- Kết thúc Javascript cho Modal Labels khi Double Click Icon (i) ---
 
     // --- DOMContentLoaded ---
 });

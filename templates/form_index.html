@@ -2,36 +2,56 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Bảng Đăng Ký Cấp EndPoint Metrics</title>
+    <title>Bảng Đăng Ký EndPoint Metrics</title>
     <!-- <link rel="stylesheet" type="text/css" href="./form_styles.css"> -->
     <link href="{{ url_for('static', filename='./form_styles.css') }}" rel="stylesheet">
 </head>
 <body>
 
 <div class="form-container" id="registrationForm">
-    <h2 class="form-title">Bảng Đăng Ký Cấp EndPoint Metrics</h2>
+    <h2 class="form-title">Bảng Đăng Ký EndPoint Metrics</h2>
     <form id="metricsForm">
         <div class="form-group">
-            <label for="nameService">Name Service:</label>
+            <label for="nameService" class="tooltip-container name-service">Name Service:
+              <div class="tooltip" id="environment-label-tooltip">
+                  Tên dịch vụ cần được đặt tên sao cho rõ nghĩ, ngắn gọn, dễ nhận biết.<br>
+                  Ví dụ: CloudMetrics-Core-Tracker<br>
+                  Proj/Service -> Cloud Metrics<br>
+                  Team -> Core<br>
+                  Application -> Tracker
+              </div>
+            </label>
             <input type="text" id="nameService" name="nameService" placeholder="Nhập tên dịch vụ cần đăng ký vào đây..." required>
         </div>
 
         <div class="form-group">
             <label>Type metrics:</label>
             <div class="radio-group">
-                <label class="radio-label">
+                <label class="radio-label tooltip-container">
                     <input type="radio" id="typeService" name="typeMetrics" value="service">
                     service
+                    <div class="tooltip" id="service-tooltip">
+                        Loại monitor sử dụng để theo dõi các thông số tài nguyên của khách hàng sử dụng cloud.
+                    </div>
                 </label>
-                <label class="radio-label">
+                <label class="radio-label tooltip-container">
                     <input type="radio" id="typeInfra" name="typeMetrics" value="infra">
                     infra
+                    <div class="tooltip" id="infra-tooltip">
+                        Loại monitor sử dụng để theo dõi các thông số hệ thống cloud, không cần thiết có sự liên quan đến khách hàng (project_id).
+                    </div>
                 </label>
             </div>
         </div>
 
         <div class="form-group environment-group">
-            <label for="environment">Environment:</label>
+            <label for="environment" class="tooltip-container">Environment:
+              <div class="tooltip" id="environment-label-tooltip">
+                  Môi trường mà dịch vụ hoặc hạ tầng của bạn được lưu trữ.<br>
+                  - Public/Infra/Staging: Lựa chọn dành cho cả 2 (Khách hàng, Nội bộ)<br>
+                  - Private: Lựa chọn dành cho phía Nội Bộ.
+              </div>
+            </label>
             <div class="environment-select">
                 <div class="environment-current-selection" id="currentEnvironmentSelection">Chọn môi trường</div>
                 <div class="environment-options" id="environment-options">
@@ -51,7 +71,11 @@
 
 
         <div class="form-group protocol-group">
-            <label for="protocol">Protocol:</label>
+            <label for="protocol" class="tooltip-container">Protocol:
+              <div class="tooltip" id="protocol-label-tooltip">
+                  Hệ thống Cụm chấp nhận dữ liệu qua nhiều ingestion protocols phổ biến ngoài giao thức có sẵn như Prometheus remote_write, InfluxDB, OpenTSDB, Graphite, CSV, JSON, native binary.
+              </div>
+            </label>
             <div class="protocol-select">
                 <div class="protocol-current-selection" id="currentProtocolSelection">Chọn giao thức</div>
                 <div class="protocol-options" id="protocol-options">
@@ -69,7 +93,11 @@
         </div>
 
         <div class="form-group">
-            <label for="nodeIp">Node IP:</label>
+            <label for="nodeIp" class="tooltip-container">Node IP:
+              <div class="tooltip" id="nodeIp-label-tooltip">
+                  Hệ thống Cụm cho phép các đầu Node IP được đăng ký đẩy dữ liệu vào. Nếu có nhiều Node IP, hãy phân tách chúng bằng dấu phẩy (ví dụ: 192.168.1.10, 192.168.1.11).
+              </div>
+            </label>
             <input type="text" id="nodeIp" class="node-ip-input" name="nodeIp" placeholder="Node IP, được phân tách bằng dấu phẩy(,)" required>
             <div id="ip-error" class="error-message"></div>
         </div>
@@ -79,10 +107,12 @@
 </div>
 
 <div class="result-container" id="resultForm" style="display:none;">
-    <h2 class="result-title">Thông Tin Đăng Ký EndPoint Metrics</h2>
+    <h2 class="result-title">Phiếu Thông Tin Đăng Ký EndPoint Metrics</h2>
 
     <div class="cluster-info">
-        <h3 class="cluster-name">Information - Victoria Metrics Staging Cluster</h3>
+        <h3 class="cluster-name">Information - Victoria Metrics Staging Cluster
+          <button type="button" class="info-icon" data-target="staging-labels-modal"></button>
+        </h3>
         <div class="info-row">
             <span class="info-label">Name Service:</span>
             <span class="info-value" id="staging-nameService"></span>
@@ -120,7 +150,9 @@
     </div>
 
     <div class="cluster-info">
-        <h3 class="cluster-name">Information Victoria Metrics Product Cluster</h3>
+        <h3 class="cluster-name">Information Victoria Metrics Product Cluster
+          <button type="button" class="info-icon" data-target="product-labels-modal"></button>
+        </h3>
         <div class="info-row">
             <span class="info-label">Name Service:</span>
             <span class="info-value" id="product-nameService">network-service</span>
@@ -155,6 +187,22 @@
          <div class="info-row labels-row" id="product-labels-row"> <div class="info-label">Labels:</div>
             <span class="info-value" id="product-labels"></span>
         </div>
+    </div>
+</div>
+
+<div id="staging-labels-modal" class="info-modal">
+    <div class="info-modal-content">
+        <span class="info-modal-close" data-target="staging-labels-modal">&times;</span>
+        <h3>Thông Tin Chi Tiết - Staging Cluster</h3>
+        <p id="staging-labels-detail"></p>
+    </div>
+</div>
+
+<div id="product-labels-modal" class="info-modal">
+    <div class="info-modal-content">
+        <span class="info-modal-close" data-target="product-labels-modal">&times;</span>
+        <h3>Thông Tin Chi Tiết - Product Cluster</h3>
+        <p id="product-labels-detail"></p>
     </div>
 </div>
 
