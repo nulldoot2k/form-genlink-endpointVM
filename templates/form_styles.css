@@ -283,6 +283,14 @@ body {
     padding-bottom: 5px;
 }
 
+.cluster-name .detail-hint {
+    float: right; 
+    opacity: 0.7; 
+    font-size: 0.9em; 
+    margin-left: 10px; 
+    color: #888; 
+}
+
 .info-row {
     display: flex;
     margin-bottom: 8px;

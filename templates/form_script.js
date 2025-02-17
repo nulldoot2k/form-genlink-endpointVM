@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         setTimeout(function() {
                             alert('ĐÂY LÀ PHIẾU ĐĂNG KÝ CỦA BẠN. CHÚNG TÔI SẼ PHẢN HỒI LẠI CHO BẠN SỚM THÔI!!!');
                             submitButton.textContent = 'Export';
-                        }, 1000);
+                        }, 200);
 
                     } else {
                         alert('Export thành công, nhưng có lỗi khi gửi Telegram. Vui lòng kiểm tra Console để biết thêm chi tiết.');
