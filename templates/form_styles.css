@@ -266,6 +266,12 @@ body {
     margin-bottom: 20px;
 }
 
+.result-title-detail {
+    padding: 5px;
+    margin: auto;
+    color: red;
+}
+
 .cluster-info {
     background-color: #fff;
     border: 1px solid #ddd;

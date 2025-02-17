@@ -50,12 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function populateEnvironmentOptions(options) {
-        environmentOptionsContainer.innerHTML = ''; // Clear existing options
+        environmentOptionsContainer.innerHTML = '';
         options.forEach(option => {
             const optionDiv = document.createElement('div');
             optionDiv.classList.add('environment-option-item');
             optionDiv.dataset.value = option.value;
-            optionDiv.textContent = option.value; // Dropdown chỉ hiển thị value (tên môi trường)
+            optionDiv.textContent = option.value; 
             environmentOptionsContainer.appendChild(optionDiv);
         });
     }
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (currentTypeMetrics === 'infra') {
                     selectedOption = infraEnvironments.find(opt => opt.value === envValue);
                 }
-                return selectedOption ? selectedOption.display : envValue; // Sử dụng option.display để có port
+                return selectedOption ? selectedOption.display : envValue;
             }).join(', ');
         }
 
@@ -466,21 +466,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById(targetModalId);
             const labelDetailParagraphId = targetModalId === 'staging-labels-modal' ? 'staging-labels-detail' : 'product-labels-detail';
             const labelDetailParagraph = document.getElementById(labelDetailParagraphId);
+            const labelDescription = `Do nhu cầu ngày càng tăng, lượng số liệu lớn với hàng ngàn dịch vụ muốn tập chung hóa vào 1 điểm thích hợp để lưu trữ. Quản lý với số lượng lớn như vậy, hệ thống đã đưa ra các yêu cầu về bài toán phân chia sao cho hợp lệ.
+            Văn bản mô tả chi tiết về các thiết lập được sử dụng trong cấu hình.
+            Việc in phiếu đăng ký giúp quy hoạch bài toán từ việc phân loại để quản lý và theo dõi dữ liệu một cách hiệu quả từ bạn.
+            - Hệ thống gửi về kết quả tương ứng với 2 Cụm. Chúng tôi sẽ gửi cho bạn mẫu thông tin trong thời gian gần nhất để triển khai trên staging trước, sau khi đã ổn định, chúng tôi sẽ cung cấp thông tin chính để triển khai lên hệ thống thực (Real).
+            - Hệ thống tự động cấp tài khoản dựa theo tên dịch vụ mà bạn đăng ký, và mật khẩu được đặt với cường độ bảo mật cao.
+            - Đầu vào cần phải tuân thủ đúng quy tắc mà chúng tôi đưa ra nhằm việc cải thiện hiệu suất, trồng chéo metrics giữa các dịch vụ đăng ký.
+            - Do đó việc đánh labels là bắt buộc: Mỗi dịch vụ chúng tôi sẽ gán với labels monitor để định danh cho phép các Node IP gửi số liệu vào. Ngoài ra số liệu (metrics) gốc sẽ được hệ thống chuyển đổi thành số liệu có đối số riêng để giám sát số liệu tốt nhất.
+            Ví dụ: __name__="cpu_total{monitor="xxx"}" --> __name__="prefix_$1{monitor="xxx"}".`;
+            labelDetailParagraph.textContent = labelDescription;
 
-            // Lấy thông tin chi tiết từ các .info-row và format lại (giữ nguyên logic này)
-            let detailedInfoText = "";
-            const clusterInfoDiv = this.closest('.cluster-info');
-            const infoRows = clusterInfoDiv.querySelectorAll('.info-row');
-
-            infoRows.forEach(row => {
-                const labelSpan = row.querySelector('.info-label');
-                const valueSpan = row.querySelector('.info-value');
-                if (labelSpan && valueSpan) {
-                    detailedInfoText += `- ${labelSpan.textContent.trim()} ${valueSpan.textContent.trim()}\n`;
-                }
-            });
-
-            labelDetailParagraph.textContent = detailedInfoText.trim();
             modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
         });
     });
@@ -500,7 +495,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    // --- Kết thúc Javascript cho Modal Labels khi Double Click Icon (i) ---
+    // --- Kết thúc Javascript cho Modal Labels khi Click Icon (i) ---
 
     // --- DOMContentLoaded ---
 });

@@ -1,14 +1,18 @@
 # Form Registry Endpoint
 
-Ứng dụng Web cho phép tạo phiếu đăng ký nhanh chóng, chia sẻ liên kết duy nhất và bắn kết quả về telegram.
+Ứng dụng Web cho phép tạo phiếu đăng ký nhanh chóng, chia sẻ liên kết duy nhất và gửi kết quả về telegram.
 
 ## Giới thiệu
 
 Form Registry Endpoint là một ứng dụng web được thiết kế để đơn giản hóa quá trình tiếp nhận thông tin thông qua các form trực tuyến. Ứng dụng này cung cấp hai giao diện form chính:
 
+![overview form](https://ik.imagekit.io/kitto2k/tech/tutorial-markdown/overview-form.png?updatedAt=1739802443379) 
+
 **Form GenLink**: Dành cho người quản trị, cho phép tạo ra các đường liên kết ngẫu nhiên. Mỗi liên kết này có giới hạn thời gian (10 phút theo mặc định) và chỉ áp dụng cho 1 lần duy nhất. Chức năng chính của trang form GenLink là tạo và sao chép các liên kết này để chia sẻ cho người dùng, đặc biệc là khách hàng muốn tạo phiếu đăng ký.
 
 **Form Registry**: Người dùng, khách hàng nhập thông tin đăng ký, nhận kết quả phiếu đăng ký cùng với thông báo từ hệ thống. Đồng thời, thông báo kết quả cũng sẽ được gửi đến người quản trị qua Telegram.
+
+**Form Invoice**: Giao diện dễ nhìn thân thiện, bao gồm thông tin đăng ký với cửa sổ mở mô tả thông tin chi tiết về phiếu đăng ký.
 
 ## Tính năng
 
