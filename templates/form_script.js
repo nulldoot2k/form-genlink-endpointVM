@@ -403,14 +403,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const ipError = document.getElementById('ip-error');
         ipError.textContent = '';
         if (!ipString) return true;
+        const ips = ipString.split(/[, ]+/).filter(ip => ip).map(ip => ip.trim());
+        
+        if (ips.length === 0) return true;
 
-        const ips = ipString.split(',').map(ip => ip.trim());
         for (const ip of ips) {
             if (!isValidIPAddress(ip)) {
                 ipError.textContent = 'Invalid IP format. Please use format like 192.168.1.1, 10.0.0.5';
                 return false;
             }
         }
+        nodeIpInput.value = ips.join(',');
         return true;
     }
 
